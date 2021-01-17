@@ -90,6 +90,11 @@ To set up your python environment to run the code in this repository, follow the
 git clone https://github.com/udacity/deep-reinforcement-learning.git
 cd deep-reinforcement-learning/python
 pip install .
+
+pip install unityagents     
+pip install mlagents     
+pip install box2d   
+conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch    
 ```
 
 4. Create an [IPython kernel](http://ipython.readthedocs.io/en/stable/install/kernel_install.html) for the `drlnd` environment.  
