@@ -55,14 +55,15 @@ class DQNAgent(object):
         return states, actions, rewards, next_states, dones
 
     def update_target_network(self):
-        if self.soft_update == True:
-            for target_param, local_param in zip(self.q_target.parameters(), self.q_local.parameters()):
-                target_param.data.copy_(self.tau * local_param.data + (1.0 - self.tau) * target_param.data)
-        elif self.learn_counter % self.target_network_update_frequency == 0:
-            self.q_target.load_state_dict(self.q_local.state_dict())
+        if self.learn_counter % self.target_network_update_frequency == 0:
+            if self.soft_update == True:
+                for target_param, local_param in zip(self.q_target.parameters(), self.q_local.parameters()):
+                    target_param.data.copy_(self.tau * local_param.data + (1.0 - self.tau) * target_param.data)
+            else:
+                self.q_target.load_state_dict(self.q_local.state_dict())
 
     def decrement_epsilon(self):
-        self.epsilon = self.epsilon - self.epsilon_decay if self.epsilon > self.epsilon_min else self.epsilon_min
+        self.epsilon = max(self.epsilon_min, self.epsilon*self.epsilon_decay)
 
     def save_models(self):
         self.q_local.save_checkpoint()
@@ -90,6 +91,4 @@ class DQNAgent(object):
         loss.backward()
         self.q_local.optimizer.step()
         self.learn_counter += 1
-
-        self.decrement_epsilon()
         self.update_target_network()

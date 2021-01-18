@@ -49,11 +49,11 @@ def main():
     lr = 0.0001
     epsilon_start = 1
     epsilon_min = 0.1
-    epsilon_decay = 1e-5
+    epsilon_decay = 0.99 
     buffer_size = 50000
     batch_size = 32
     update_frequency = 1000
-    soft_update = True
+    soft_update = False
     tau = 0.001
     checkpoint_dir='models/'
     agent = DQNAgent(gamma, lr, epsilon_start, epsilon_min, epsilon_decay, state_size, action_size,
@@ -80,6 +80,7 @@ def main():
         scores.append(score)
         ave_score = np.mean(scores[-100:])
         eps_history.append(agent.epsilon)
+        agent.decrement_epsilon()
         if ave_score > best_score:
             best_score = ave_score
         print('episode: ', i,'score: ', score, ' average score %.1f' % ave_score, 
