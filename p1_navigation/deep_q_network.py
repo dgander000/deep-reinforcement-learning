@@ -11,8 +11,9 @@ class DeepQNetwork(nn.Module):
         self.checkpoint_file = os.path.join(self.checkpoint_dir, checkpoint_name)
 
         self.fc1 = nn.Linear(state_size, 64)
-        self.fc2 = nn.Linear(64, 128)
-        self.fc3 = nn.Linear(128, action_size)
+        self.fc2 = nn.Linear(64, 64)
+        self.fc3 = nn.Linear(64, 64)
+        self.fc4 = nn.Linear(64, action_size)
 
         self.optimizer = optim.RMSprop(self.parameters(), lr=lr)
         self.loss = nn.MSELoss()
@@ -22,7 +23,8 @@ class DeepQNetwork(nn.Module):
     def forward(self, state):
         x = F.relu(self.fc1(state))
         x = F.relu(self.fc2(x))
-        actions = self.fc3(x)
+        x = F.relu(self.fc3(x))
+        actions = self.fc4(x)
         return actions
 
     def save_checkpoint(self):

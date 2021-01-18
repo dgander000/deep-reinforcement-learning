@@ -53,9 +53,11 @@ def main():
     buffer_size = 50000
     batch_size = 32
     update_frequency = 1000
+    soft_update = True
+    tau = 0.001
     checkpoint_dir='models/'
-    agent = DQNAgent(gamma, lr, epsilon_start, epsilon_min, epsilon_decay, state_size, 
-                    action_size, buffer_size, batch_size, update_frequency, checkpoint_dir)
+    agent = DQNAgent(gamma, lr, epsilon_start, epsilon_min, epsilon_decay, state_size, action_size,
+                    buffer_size, batch_size, update_frequency, soft_update, tau, checkpoint_dir)
 
     for i in range(n_episodes):
         score = 0
@@ -71,7 +73,7 @@ def main():
             done = env_info.local_done[0]
 
             agent.step(state, action, reward, next_state, done)
-            
+
             state = next_state
             score += reward
 

@@ -4,8 +4,8 @@ from deep_q_network import DeepQNetwork
 from replay_buffer import ReplayBuffer
 
 class DQNAgent(object):
-    def __init__(self, gamma, lr, epsilon_start, epsilon_min, epsilon_decay, state_size, 
-                 action_size, buffer_size, batch_size, update_frequency, checkpoint_dir='tmp'):
+    def __init__(self, gamma, lr, epsilon_start, epsilon_min, epsilon_decay, state_size, action_size,
+                 buffer_size, batch_size, update_frequency, soft_update=False, tau=0.001, checkpoint_dir='tmp'):
         self.gamma = gamma
         self.lr = lr
         self.epsilon_start = epsilon_start
@@ -16,6 +16,8 @@ class DQNAgent(object):
         self.state_size = state_size
         self.batch_size = batch_size
         self.target_network_update_frequency = update_frequency
+        self.soft_update = soft_update
+        self.tau = tau
         self.checkpoint_dir = checkpoint_dir
         self.action_space = [i for i in range(action_size)]
         self.learn_counter = 0
@@ -53,7 +55,10 @@ class DQNAgent(object):
         return states, actions, rewards, next_states, dones
 
     def update_target_network(self):
-        if self.learn_counter % self.target_network_update_frequency == 0:
+        if self.soft_update == True:
+            for target_param, local_param in zip(self.q_target.parameters(), self.q_local.parameters()):
+                target_param.data.copy_(self.tau * local_param.data + (1.0 - self.tau) * target_param.data)
+        elif self.learn_counter % self.target_network_update_frequency == 0:
             self.q_target.load_state_dict(self.q_local.state_dict())
 
     def decrement_epsilon(self):
@@ -74,15 +79,14 @@ class DQNAgent(object):
         self.q_local.optimizer.zero_grad()
 
         states, actions, rewards, next_states, dones = self.sample_memory()
+
+        q_targets = self.q_target.forward(next_states).max(dim=1)[0]
+        q_targets = rewards + self.gamma*q_targets*(1-dones)
+
         indices = np.arange(self.batch_size)
+        q_expected = self.q_local.forward(states)[indices, actions]
 
-        q_pred = self.q_local.forward(states)[indices, actions]
-        q_target = self.q_target.forward(next_states).max(dim=1)[0]
-
-        # q_target[dones] = 0.0
-        q_target = rewards + self.gamma*q_target*(1-dones)
-
-        loss = self.q_local.loss(q_target, q_pred).to(self.q_local.device)
+        loss = self.q_local.loss(q_expected, q_targets).to(self.q_local.device)
         loss.backward()
         self.q_local.optimizer.step()
         self.learn_counter += 1
