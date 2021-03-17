@@ -102,3 +102,8 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+p1_navigation/Banana_Linux/
+p1_navigation/models/
+p2_continuous-control/Reacher_Linux/
+p2_continuous-control/models/
