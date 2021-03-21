@@ -103,7 +103,10 @@ ENV/
 # mypy
 .mypy_cache/
 
+*.pth 
+
 p1_navigation/Banana_Linux/
 p1_navigation/models/
 p2_continuous-control/Reacher_Linux/
 p2_continuous-control/models/
+p3_collab-compet/Tennis_Linux
